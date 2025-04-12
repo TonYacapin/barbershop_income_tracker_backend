@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes'); // Import user routes
+const incomeRoutes = require('./routes/incomeRoutes'); // Import income routes
 
 // Load environment variables
 dotenv.config();
@@ -18,7 +19,8 @@ mongoose
   .connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useCreateIndex: true, // Add this option to avoid the deprecation warning
+    useCreateIndex: true, // Avoid deprecation warning for index creation
+    useFindAndModify: false, // Avoid deprecation warning for findAndModify
   })
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => {
@@ -33,6 +35,7 @@ app.get('/api/test', (req, res) => {
 
 // Use user routes
 app.use('/api/users', userRoutes); // Mount user routes under /api/users
+app.use('/api/income', incomeRoutes); // Mount income routes under /api/income
 
 // Start the server
 const PORT = process.env.PORT || 5000;
