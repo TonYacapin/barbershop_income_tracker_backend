@@ -1,1 +1,0 @@
-# barbershop_income_tracker_backend
