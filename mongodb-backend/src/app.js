@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes'); // Import user routes
 const incomeRoutes = require('./routes/incomeRoutes'); // Import income routes
-
+const incomeSettingsRoutes = require('./routes/incomeSettingsRoutes'); // Import income settings routes
 // Load environment variables
 dotenv.config();
 
@@ -36,7 +36,7 @@ app.get('/api/test', (req, res) => {
 // Use user routes
 app.use('/api/users', userRoutes); // Mount user routes under /api/users
 app.use('/api/income', incomeRoutes); // Mount income routes under /api/income
-
+app.use('/api/income-settings', incomeSettingsRoutes); // Mount income settings routes under /api/income-settings
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
