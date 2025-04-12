@@ -26,6 +26,11 @@ mongoose
     process.exit(1); // Exit the application if the connection fails
   });
 
+// Test route
+app.get('/api/test', (req, res) => {
+  res.status(200).json({ message: 'Test route is working!' });
+});
+
 // Use user routes
 app.use('/api/users', userRoutes); // Mount user routes under /api/users
 
