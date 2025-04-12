@@ -4,7 +4,7 @@ const { IncomeSettings } = require('../models/incomeSettings'); // Import Income
 // Create a new income record
 const createIncome = async (req, res) => {
     try {
-        const { source, numberOfHeads } = req.body;
+        const { source, numberOfHeads, isOwner } = req.body;
 
         // Fetch the haircut price and owner's share percentage from IncomeSettings
         const settings = await IncomeSettings.findOne();
@@ -15,9 +15,11 @@ const createIncome = async (req, res) => {
         const haircutPrice = settings.haircutPrice;
         const ownerSharePercentage = settings.ownerSharePercentage;
 
-        // Calculate the total income and owner's share
+        // Calculate the total income
         const income = numberOfHeads * haircutPrice;
-        const ownerShare = (income * ownerSharePercentage) / 100;
+
+        // Calculate the owner's share if `isOwner` is false
+        const ownerShare = isOwner ? 0 : (income * ownerSharePercentage) / 100;
 
         // Create a new income record
         const newIncome = new Income({
@@ -38,7 +40,7 @@ const createIncome = async (req, res) => {
 const updateIncome = async (req, res) => {
     try {
         const { id } = req.params;
-        const { source, numberOfHeads } = req.body;
+        const { source, numberOfHeads, isOwner } = req.body;
 
         // Fetch the haircut price and owner's share percentage from IncomeSettings
         const settings = await IncomeSettings.findOne();
@@ -49,9 +51,11 @@ const updateIncome = async (req, res) => {
         const haircutPrice = settings.haircutPrice;
         const ownerSharePercentage = settings.ownerSharePercentage;
 
-        // Calculate the updated income and owner's share
+        // Calculate the updated income
         const income = numberOfHeads * haircutPrice;
-        const ownerShare = (income * ownerSharePercentage) / 100;
+
+        // Calculate the owner's share if `isOwner` is false
+        const ownerShare = isOwner ? 0 : (income * ownerSharePercentage) / 100;
 
         const updatedIncome = await Income.findByIdAndUpdate(
             id,
