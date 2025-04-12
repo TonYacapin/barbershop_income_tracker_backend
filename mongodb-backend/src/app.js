@@ -1,26 +1,36 @@
 const express = require('express');
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const databaseConfig = require('./config/database');
-const routes = require('./routes');
+const userRoutes = require('./routes/userRoutes'); // Import user routes
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Middleware to parse JSON and URL-encoded data
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Database connection
-mongoose.connect(databaseConfig.uri, databaseConfig.options)
-    .then(() => {
-        console.log('Connected to MongoDB');
-    })
-    .catch(err => {
-        console.error('MongoDB connection error:', err);
-    });
+// Connect to MongoDB
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/barbershop_income_tracker';
+mongoose
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true, // Add this option to avoid the deprecation warning
+  })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB', err);
+    process.exit(1); // Exit the application if the connection fails
+  });
 
-// Routes
-app.use('/api', routes());
+// Use user routes
+app.use('/api/users', userRoutes); // Mount user routes under /api/users
 
+// Start the server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
