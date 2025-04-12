@@ -1,26 +1,51 @@
 const express = require('express');
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const databaseConfig = require('./config/database');
-const routes = require('./routes');
+const cors = require('cors'); // Import CORS
+const userRoutes = require('./routes/userRoutes'); // Import user routes
+const incomeRoutes = require('./routes/incomeRoutes'); // Import income routes
+const incomeSettingsRoutes = require('./routes/incomeSettingsRoutes'); // Import income settings routes
+const incomeChartsRoutes = require('./routes/incomeChartsRoutes'); // Import income charts routes
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Enable CORS
+app.use(cors()); // Allow all origins by default
+
+// Middleware to parse JSON and URL-encoded data
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Database connection
-mongoose.connect(databaseConfig.uri, databaseConfig.options)
-    .then(() => {
-        console.log('Connected to MongoDB');
-    })
-    .catch(err => {
-        console.error('MongoDB connection error:', err);
-    });
+// Connect to MongoDB
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/barbershop_income_tracker';
+mongoose
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true, // Avoid deprecation warning for index creation
+    useFindAndModify: false, // Avoid deprecation warning for findAndModify
+  })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB', err);
+    process.exit(1); // Exit the application if the connection fails
+  });
 
-// Routes
-app.use('/api', routes());
+// Test route
+app.get('/api/test', (req, res) => {
+  res.status(200).json({ message: 'Test route is working!' });
+});
 
+// Use user routes
+app.use('/api/users', userRoutes); // Mount user routes under /api/users
+app.use('/api/income', incomeRoutes); // Mount income routes under /api/income
+app.use('/api/income-settings', incomeSettingsRoutes); // Mount income settings routes under /api/income-settings
+app.use('/api/income-charts', incomeChartsRoutes); // Mount income charts routes under /api/income-charts
+// Start the server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
