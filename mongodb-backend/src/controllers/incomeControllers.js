@@ -15,18 +15,21 @@ const createIncome = async (req, res) => {
         const haircutPrice = settings.haircutPrice;
         const ownerSharePercentage = settings.ownerSharePercentage;
 
-        // Calculate the total income
-        const income = numberOfHeads * haircutPrice;
+        let income;
 
-        // Calculate the owner's share if `isOwner` is false
-        const ownerShare = isOwner ? 0 : (income * ownerSharePercentage) / 100;
+        if (isOwner) {
+            // If owner, they keep 100% of the income
+            income = numberOfHeads * haircutPrice;
+        } else {
+            // If not owner, they only get a percentage (e.g., 60%) of the total
+            income = numberOfHeads * haircutPrice * (ownerSharePercentage / 100);
+        }
 
         // Create a new income record
         const newIncome = new Income({
             source,
             numberOfHeads,
             income,
-            ownerShare, // Add owner's share to the record
         });
 
         await newIncome.save();
@@ -35,7 +38,6 @@ const createIncome = async (req, res) => {
         res.status(500).json({ message: 'Error creating income record', error: error.message });
     }
 };
-
 // Update an income record by ID
 const updateIncome = async (req, res) => {
     try {
