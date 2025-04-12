@@ -44,7 +44,7 @@ const updateIncome = async (req, res) => {
         const { id } = req.params;
         const { source, numberOfHeads, isOwner } = req.body;
 
-        // Fetch the haircut price and owner's share percentage from IncomeSettings
+        // Fetch settings
         const settings = await IncomeSettings.findOne();
         if (!settings) {
             return res.status(400).json({ message: 'Income settings not configured' });
@@ -53,15 +53,17 @@ const updateIncome = async (req, res) => {
         const haircutPrice = settings.haircutPrice;
         const ownerSharePercentage = settings.ownerSharePercentage;
 
-        // Calculate the updated income
-        const income = numberOfHeads * haircutPrice;
-
-        // Calculate the owner's share if `isOwner` is false
-        const ownerShare = isOwner ? 0 : (income * ownerSharePercentage) / 100;
+        // Compute income based on ownership
+        let income;
+        if (isOwner) {
+            income = numberOfHeads * haircutPrice;
+        } else {
+            income = numberOfHeads * haircutPrice * (ownerSharePercentage / 100);
+        }
 
         const updatedIncome = await Income.findByIdAndUpdate(
             id,
-            { source, numberOfHeads, income, ownerShare },
+            { source, numberOfHeads, income },
             { new: true, runValidators: true }
         );
 
