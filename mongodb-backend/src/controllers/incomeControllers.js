@@ -78,12 +78,34 @@ const updateIncome = async (req, res) => {
 // Other methods remain unchanged
 const getAllIncome = async (req, res) => {
     try {
-        const incomes = await Income.find();
+        const { startDate, endDate } = req.query;
+        
+        // Build filter object
+        const filter = {};
+        
+        // Add date filtering if provided
+        if (startDate || endDate) {
+            filter.createdAt = {};
+            
+            if (startDate) {
+                filter.createdAt.$gte = new Date(startDate);
+            }
+            
+            if (endDate) {
+                // Set to end of the day for the end date
+                const endOfDay = new Date(endDate);
+                endOfDay.setHours(23, 59, 59, 999);
+                filter.createdAt.$lte = endOfDay;
+            }
+        }
+        
+        const incomes = await Income.find(filter);
         res.status(200).json({ incomes });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching income records', error: error.message });
     }
 };
+
 
 const getIncomeById = async (req, res) => {
     try {
